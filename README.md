@@ -2,6 +2,7 @@
 Code for paper "Entity Linking via Joint Encoding of Types, Descriptions, and Context", EMNLP '17
 
 ![overview](https://github.com/nitishgupta/neural-el/raw/master/overview.png "overview")
+<img src="https://raw.githubusercontent.com/nitishgupta/neural-el/master/overview.png" alt="https://raw.githubusercontent.com/nitishgupta/neural-el/master/overview.png">
 
 ## Abstract
 For accurate entity linking, we need to capture the various information aspects of an entity, such as its description in a KB, contexts in which it is mentioned, and structured knowledge. Further, a linking system should work on texts from different domains without requiring domain-specific training data or hand-engineered features.
