@@ -1,9 +1,8 @@
-# Neural Entity Linking
-Code for paper "Entity Linking via Joint Encoding of Types, Descriptions, and Context", EMNLP '17
+Neural Entity Linking
+=====================
+Code for paper
+"[Entity Linking via Joint Encoding of Types, Descriptions, and Context](http://cogcomp.org/page/publication_view/817)", EMNLP '17
 
-<!---
-![overview](https://github.com/nitishgupta/neural-el/raw/master/overview.png "overview")
--->
 <img src="https://raw.githubusercontent.com/nitishgupta/neural-el/master/overview.png" alt="https://raw.githubusercontent.com/nitishgupta/neural-el/master/overview.png">
 
 ## Abstract
