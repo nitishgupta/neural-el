@@ -15,10 +15,10 @@ In this work we present a neural, modular entity linking system that learns a un
 * numpy
 
 ### How to run inference
-1. Download the resources folder from [here](www.google.com).
+1. Download the resources folder from [here](https://drive.google.com/open?id=0Bz-t37BfgoTuR2FoVkFESlppNWs).
 2. In `config/config.ini` set the correct path to the resources folder you just downloaded
 3. Run using:
 ```
-python3 neuralel.py --config=configs/config.ini --modelpath=PATH_MODEL_IN_RESOURCES --mode=inference
+python3 neuralel.py --config=configs/config.ini --modelpath=PATH_TO_MODEL_IN_RESOURCES --mode=inference
 ```
 The file `sampletest.txt` in the resources folder contains the text to be entity-linked. Currently we only support linking for a single document. Make sure the text in `sampletest.txt` is a single doc in a single line.

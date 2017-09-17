@@ -17,11 +17,10 @@ flags = tf.app.flags
 flags.DEFINE_integer("max_steps", 32000, "Maximum of iteration [450000]")
 flags.DEFINE_integer("pretraining_steps", 32000, "Number of steps to run pretraining")
 flags.DEFINE_float("learning_rate", 0.005, "Learning rate of adam optimizer [0.001]")
-flags.DEFINE_string("model_path",
-                    "/save/ngupta19/checkpoint/neural-el_resources/models/CT.model",
-                    "Path to trained model")
+flags.DEFINE_string("model_path", "", "Path to trained model")
 flags.DEFINE_string("dataset", "el-figer", "The name of dataset [ptb]")
-flags.DEFINE_string("checkpoint_dir", "/tmp", "Directory name to save the checkpoints [checkpoints]")
+flags.DEFINE_string("checkpoint_dir", "/tmp",
+                    "Directory name to save the checkpoints [checkpoints]")
 flags.DEFINE_integer("batch_size", 1, "Batch Size for training and testing")
 flags.DEFINE_integer("word_embed_dim", 300, "Word Embedding Size")
 flags.DEFINE_integer("context_encoded_dim", 100, "Context Encoded Dim")
@@ -60,6 +59,7 @@ def FLAGS_check(FLAGS):
     if not (FLAGS.textcontext and FLAGS.coherence):
         print("*** Local and Document context required ***")
         sys.exit(0)
+    assert os.path.exists(FLAGS.model_path), "Model path doesn't exist."
 
 
 def main(_):
