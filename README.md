@@ -15,7 +15,8 @@ In this work we present a neural, modular entity linking system that learns a un
 * numpy
 
 ### How to run inference
-1. Download the resources folder from [here](https://drive.google.com/open?id=0Bz-t37BfgoTuSEtXOTI1SEF3VnM).
+1. Clone the [code repository](https://github.com/nitishgupta/neural-el/)
+1. Download the [resources folder](https://drive.google.com/open?id=0Bz-t37BfgoTuSEtXOTI1SEF3VnM).
 2. In `config/config.ini` set the correct path to the resources folder you just downloaded
 3. Run using:
 ```
