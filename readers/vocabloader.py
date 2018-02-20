@@ -6,7 +6,6 @@ import time
 import math
 import pickle
 import random
-import gensim
 import pprint
 import unicodedata
 import configparser
