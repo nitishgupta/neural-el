@@ -28,5 +28,5 @@ The file `sampletest.txt` in the resources folder contains the text to be entity
 To install tensorflow 0.12:
 ```
 export TF_BINARY_URL=https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-0.12.1-cp34-cp34m-linux_x86_64.whl
-pip install --upgrade tfBinaryURL
+pip install --upgrade $TF_BINARY_URL
 ```
