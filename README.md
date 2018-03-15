@@ -13,6 +13,8 @@ In this work we present a neural, modular entity linking system that learns a un
 * Python 3.4
 * Tensorflow 0.11 / 0.12
 * numpy
+* [CogComp-NLPy](https://github.com/CogComp/cogcomp-nlpy)
+* [Resources](https://drive.google.com/open?id=0Bz-t37BfgoTuSEtXOTI1SEF3VnM) - Pretrained models, vectors, etc.
 
 ### How to run inference
 1. Clone the [code repository](https://github.com/nitishgupta/neural-el/)
