@@ -24,6 +24,13 @@ python3 neuralel.py --config=configs/config.ini --model_path=PATH_TO_MODEL_IN_RE
 ```
 The file `sampletest.txt` in the resources folder contains the text to be entity-linked. Currently we only support linking for a single document. Make sure the text in `sampletest.txt` is a single doc in a single line.
 
+### Installing cogcomp-nlpy
+[CogComp-NLPy](https://github.com/CogComp/cogcomp-nlpy) is needed to detect named-entity mentions using NER. To install:
+```
+pip install cython
+pip install ccg_nlpy
+```
+
 ### Installing Tensorflow (CPU Version)
 To install tensorflow 0.12:
 ```
