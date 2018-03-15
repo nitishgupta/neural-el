@@ -11,7 +11,7 @@ In this work we present a neural, modular entity linking system that learns a un
 
 ### Requirements
 * Python 3.4
-* Tensorflow 0.11.0
+* Tensorflow 0.11 / 0.12
 * numpy
 
 ### How to run inference
@@ -24,7 +24,9 @@ python3 neuralel.py --config=configs/config.ini --model_path=PATH_TO_MODEL_IN_RE
 ```
 The file `sampletest.txt` in the resources folder contains the text to be entity-linked. Currently we only support linking for a single document. Make sure the text in `sampletest.txt` is a single doc in a single line.
 
-To install tensorflow 0.12 (with which the code works as well) use 
+### Installing Tensorflow
+To install tensorflow 0.12:
 ```
 export TF_BINARY_URL=https://storage.googleapis.com/tensorflow/linux/cpu/tensorflow-0.12.1-cp34-cp34m-linux_x86_64.whl
+pip install --upgrade tfBinaryURL
 ```
