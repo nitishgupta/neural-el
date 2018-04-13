@@ -1,5 +1,6 @@
 import os
 import sys
+import copy
 import pprint
 import numpy as np
 import tensorflow as tf
@@ -84,6 +85,8 @@ def main(_):
                                  strict_context=FLAGS.strict_context,
                                  pretrain_wordembed=FLAGS.pretrain_wordembed,
                                  coherence=FLAGS.coherence)
+
+        docta = reader.ccgdoc
         model_mode = 'test'
     else:
         print("MODE in FLAGS is incorrect : {}".format(FLAGS.mode))
@@ -139,23 +142,43 @@ def main(_):
             assert numMentionsInference == numMentionsReader
 
             mentionnum = 0
+            entityTitleList = []
             for sent_idx in reader.sentidx2ners:
                 nerDicts = reader.sentidx2ners[sent_idx]
                 sentence = ' '.join(reader.sentences_tokenized[sent_idx])
                 for s, ner in nerDicts:
-                    [evWTs, evWIDS, evProbs]  = evWTs_list[mentionnum]
+                    [evWTs, evWIDS, evProbs] = evWTs_list[mentionnum]
                     predTypes = pred_TypeSetsList[mentionnum]
                     print(reader.bracketMentionInSentence(sentence, ner))
                     print("Prior: {} {}, Context: {} {}, Joint: {} {}".format(
                         evWTs[0], evProbs[0], evWTs[1], evProbs[1],
                         evWTs[2], evProbs[2]))
+
+                    entityTitleList.append(evWTs[2])
                     print("Predicted Entity Types : {}".format(predTypes))
                     print("\n")
                     mentionnum += 1
-
         else:
             print("WRONG MODE!")
             sys.exit(0)
+
+
+    elview = copy.deepcopy(docta.view_dictionary['NER_CONLL'])
+    elview.view_name = 'ENG_NEURAL_EL'
+    for i, cons in enumerate(elview.cons_list):
+        cons['label'] = entityTitleList[i]
+
+    docta.view_dictionary['ENG_NEURAL_EL'] = elview
+
+    print("elview.cons_list")
+    print(elview.cons_list)
+    print("\n")
+
+    for v in docta.as_json['views']:
+        print(v)
+        print("\n")
+
+
     sys.exit()
 
 if __name__ == '__main__':

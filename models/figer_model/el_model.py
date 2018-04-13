@@ -462,11 +462,11 @@ class ELModel(Model):
         self.reader.reset_test()
         numInstances = 0
 
-        # For types: List contains numpy matrices of row_size = BatchSize
+        # For types: List contains numpy matrices with row_size = BatchSize
         predLabelScoresnumpymat_list = []
         # For EL : Lists contain one list per mention
-        condProbs_list = []     # Crosswikis conditional priors
         widIdxs_list = []       # Candidate WID IDXs (First is true)
+        condProbs_list = []     # Crosswikis conditional priors
         contextProbs_list = []  # Predicted Entity prob using context
 
         while self.reader.epochs < 1:
@@ -515,9 +515,14 @@ class ELModel(Model):
 
         print("Num of instances {}".format(numInstances))
         # print("Starting Type and EL Evaluations ... ")
+        # pred_TypeSetsList: [B, Types], For each mention, list of pred types
         pred_TypeSetsList = evaluate_types.evaluate(
             predLabelScoresnumpymat_list,
             self.reader.idx2label)
+
+        # evWTs:For each mention: Contains a list of [WTs, WIDs, Probs]
+        # Each element above has (MaxPrior, MaxContext, MaxJoint)
+        # sortedContextWTs: Titles sorted in decreasing context prob
         (evWTs, sortedContextWTs) = evaluate_inference.evaluateEL(
             condProbs_list, widIdxs_list, contextProbs_list,
             self.reader.idx2knwid, self.reader.wid2WikiTitle,
