@@ -1,6 +1,7 @@
 logs/
 deprecated/
 test.py
+readers/crosswikis_test.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
