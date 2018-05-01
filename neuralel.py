@@ -6,6 +6,7 @@ import numpy as np
 import tensorflow as tf
 
 from readers.inference_reader import InferenceReader
+from readers.test_reader import TestDataReader
 from models.figer_model.el_model import ELModel
 from readers.config import Config
 from readers.vocabloader import VocabLoader
@@ -53,6 +54,7 @@ flags.DEFINE_string("optimizer", 'adam', "Optimizer to use. adagrad, adadelta or
 
 flags.DEFINE_string("config", 'configs/config.ini',
                     "VocabConfig Filepath")
+flags.DEFINE_string("test_out_fp", "", "Write Test Prediction Data")
 
 FLAGS = flags.FLAGS
 
@@ -85,9 +87,24 @@ def main(_):
                                  strict_context=FLAGS.strict_context,
                                  pretrain_wordembed=FLAGS.pretrain_wordembed,
                                  coherence=FLAGS.coherence)
-
         docta = reader.ccgdoc
         model_mode = 'test'
+
+    if FLAGS.mode == 'test':
+        FLAGS.dropout_keep_prob = 1.0
+        FLAGS.wordDropoutKeep = 1.0
+        FLAGS.cohDropoutKeep = 1.0
+
+        reader = TestDataReader(config=config,
+                                vocabloader=vocabloader,
+                                test_mens_file=config.test_file,
+                                num_cands=30,
+                                batch_size=FLAGS.batch_size,
+                                strict_context=FLAGS.strict_context,
+                                pretrain_wordembed=FLAGS.pretrain_wordembed,
+                                coherence=FLAGS.coherence)
+        model_mode = 'test'
+
     else:
         print("MODE in FLAGS is incorrect : {}".format(FLAGS.mode))
         sys.exit()
@@ -126,7 +143,7 @@ def main(_):
             Fsize=FLAGS.Fsize,
             entyping=FLAGS.entyping)
 
-        if FLAGS.mode=='inference':
+        if FLAGS.mode == 'inference':
             print("Doing inference")
             (predTypScNPmat_list,
              widIdxs_list,
@@ -158,25 +175,60 @@ def main(_):
                     print("Predicted Entity Types : {}".format(predTypes))
                     print("\n")
                     mentionnum += 1
+
+            elview = copy.deepcopy(docta.view_dictionary['NER_CONLL'])
+            elview.view_name = 'ENG_NEURAL_EL'
+            for i, cons in enumerate(elview.cons_list):
+                cons['label'] = entityTitleList[i]
+
+            docta.view_dictionary['ENG_NEURAL_EL'] = elview
+
+            print("elview.cons_list")
+            print(elview.cons_list)
+            print("\n")
+
+            for v in docta.as_json['views']:
+                print(v)
+                print("\n")
+
+        elif FLAGS.mode == 'test':
+            print("Testing on Data ")
+            (widIdxs_list, condProbs_list, contextProbs_list,
+             condContextJointProbs_list, evWTs,
+             sortedContextWTs) = model.dataset_test(ckptpath=FLAGS.model_path)
+
+            print(len(widIdxs_list))
+            print(len(condProbs_list))
+            print(len(contextProbs_list))
+            print(len(condContextJointProbs_list))
+            print(len(reader.mentions))
+
+
+            print("Writing Test Predictions: {}".format(FLAGS.test_out_fp))
+            with open(FLAGS.test_out_fp, 'w') as f:
+                for (wididxs, pps, mps, jps) in zip(widIdxs_list,
+                                                    condProbs_list,
+                                                    contextProbs_list,
+                                                    condContextJointProbs_list):
+
+                    mentionPred = ""
+
+                    for (wididx, prp, mp, jp) in zip(wididxs, pps, mps, jps):
+                        wit = reader.widIdx2WikiTitle(wididx)
+                        mentionPred += wit + " " + str(prp) + " " + \
+                            str(mp) + " " + str(jp)
+                        mentionPred += "\t"
+
+                    mentionPred = mentionPred.strip() + "\n"
+
+                    f.write(mentionPred)
+
         else:
             print("WRONG MODE!")
             sys.exit(0)
 
 
-    elview = copy.deepcopy(docta.view_dictionary['NER_CONLL'])
-    elview.view_name = 'ENG_NEURAL_EL'
-    for i, cons in enumerate(elview.cons_list):
-        cons['label'] = entityTitleList[i]
 
-    docta.view_dictionary['ENG_NEURAL_EL'] = elview
-
-    print("elview.cons_list")
-    print(elview.cons_list)
-    print("\n")
-
-    for v in docta.as_json['views']:
-        print(v)
-        print("\n")
 
 
     sys.exit()

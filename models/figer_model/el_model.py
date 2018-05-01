@@ -6,7 +6,7 @@ import sys
 import gc
 
 from evaluation import evaluate_inference
-from evaluation import evaluate_types
+from evaluation import evaluate_types, evaluate_el
 from models.base import Model
 from models.figer_model.context_encoder import ContextEncoderModel
 from models.figer_model.coherence_model import CoherenceModel
@@ -531,6 +531,101 @@ class ELModel(Model):
         return (predLabelScoresnumpymat_list,
                 widIdxs_list, condProbs_list, contextProbs_list,
                 evWTs, pred_TypeSetsList)
+
+
+
+
+    def dataset_test(self, ckptpath=None):
+        saver = tf.train.Saver(var_list=tf.all_variables())
+        # (Try) Load all pretraining model variables
+        print("Loading pre-saved model...")
+        load_status = self.loadCKPTPath(saver=saver, ckptPath=ckptpath)
+
+        if not load_status:
+            print("No model to load. Exiting")
+            sys.exit(0)
+        tf.get_default_graph().finalize()
+
+        returns = self.dataset_performance()
+        return returns
+
+    def dataset_performance(self):
+        print("Test accuracy starting ... ")
+        assert self.reader.typeOfReader=="test"
+        # assert self.reader.batch_size == 1
+        self.reader.reset_test()
+        numInstances = 0
+
+        stime = time.time()
+
+        # For types: List contains numpy matrices of row_size = BatchSize
+        trueLabelScoresnumpymat_list = []
+        predLabelScoresnumpymat_list = []
+        # For EL : Lists contain one list per mention
+        condProbs_list = []    # Crosswikis conditional priors
+        widIdxs_list = []      # Candidate WID IDXs (First is true)
+        contextProbs_list = [] # Predicted Entity prob using context
+
+        while self.reader.epochs < 1:
+            (left_batch, left_lengths,
+             right_batch, right_lengths,
+             # wikidesc_batch,
+             labels_batch, coherence_batch,
+             wid_idxs_batch, wid_cprobs_batch) = self.reader.next_test_batch()
+
+            # Candidates for entity linking
+            feed_dict = {#self.wikidesc_batch: wikidesc_batch,
+                         self.sampled_entity_ids: wid_idxs_batch,
+                         self.entity_priors: wid_cprobs_batch}
+            # Required Context
+            if self.textcontext:
+                if self.pretrain_word_embed == False:
+                    context_dict = {
+                      self.left_batch: left_batch, self.right_batch: right_batch,
+                      self.left_lengths: left_lengths, self.right_lengths: right_lengths}
+                else:
+                    context_dict = {
+                      self.left_context_embeddings: left_batch, self.right_context_embeddings: right_batch,
+                      self.left_lengths: left_lengths, self.right_lengths: right_lengths}
+                feed_dict.update(context_dict)
+            if self.coherence:
+                coherence_dict = {self.coherence_indices: coherence_batch[0],
+                                  self.coherence_values: coherence_batch[1],
+                                  self.coherence_matshape: coherence_batch[2]}
+                feed_dict.update(coherence_dict)
+
+            fetch_tensors = [self.labeling_model.label_probs,
+                             self.posterior_model.entity_posteriors]
+
+            fetches = self.sess.run(fetch_tensors, feed_dict=feed_dict)
+
+            [label_sigms, context_probs] = fetches
+
+            trueLabelScoresnumpymat_list.append(labels_batch)
+            predLabelScoresnumpymat_list.append(label_sigms)
+            condProbs_list.extend(wid_cprobs_batch)
+            widIdxs_list.extend(wid_idxs_batch)
+            contextProbs_list.extend(context_probs.tolist())
+            numInstances += self.reader.batch_size
+
+        print("Num of instances {}".format(numInstances))
+        print("Starting Type and EL Evaluations ... ")
+        # evaluate_types.evaluate(
+        #   trueLabelScoresnumpymat_list, predLabelScoresnumpymat_list,
+        #   condProbs_list, widIdxs_list, contextProbs_list,
+        #   self.reader.wid2WikiTitle, self.reader.wid2TypeLabels,
+        #   self.reader.idx2label)
+        # evaluate.types_predictions(
+        #   trueLabelScoresnumpymat_list, predLabelScoresnumpymat_list)
+        (condContextJointProbs_list, evWTs,
+         sortedContextWTs) = evaluate_el.evaluateEL(
+            condProbs_list, widIdxs_list, contextProbs_list,
+            self.reader.idx2knwid, self.reader.wid2WikiTitle,
+            verbose=False)
+
+        return (widIdxs_list, condProbs_list, contextProbs_list,
+                condContextJointProbs_list, evWTs, sortedContextWTs)
+    #end test
 
     def softmax(self, scores):
         expc = np.exp(scores)
