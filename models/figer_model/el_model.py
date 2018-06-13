@@ -439,6 +439,19 @@ class ELModel(Model):
     #end training
 
     # #####################      TEST     ##################################
+    def load_ckpt_model(self, ckptpath=None):
+        saver = tf.train.Saver(var_list=tf.all_variables())
+        # (Try) Load all pretraining model variables
+        print("Loading pre-saved model...")
+        load_status = self.loadCKPTPath(saver=saver, ckptPath=ckptpath)
+
+        if not load_status:
+            print("No model to load. Exiting")
+            sys.exit(0)
+
+        tf.get_default_graph().finalize()
+
+
     def inference(self, ckptpath=None):
         saver = tf.train.Saver(var_list=tf.all_variables())
         # (Try) Load all pretraining model variables
@@ -455,8 +468,6 @@ class ELModel(Model):
         return r
 
     def inference_run(self):
-        print("Test accuracy starting ... ")
-        print(self.reader.typeOfReader)
         assert self.reader.typeOfReader == "inference"
         # assert self.reader.batch_size == 1
         self.reader.reset_test()
@@ -513,7 +524,7 @@ class ELModel(Model):
             contextProbs_list.extend(context_probs.tolist())
             numInstances += self.reader.batch_size
 
-        print("Num of instances {}".format(numInstances))
+        # print("Num of instances {}".format(numInstances))
         # print("Starting Type and EL Evaluations ... ")
         # pred_TypeSetsList: [B, Types], For each mention, list of pred types
         pred_TypeSetsList = evaluate_types.evaluate(
@@ -523,16 +534,16 @@ class ELModel(Model):
         # evWTs:For each mention: Contains a list of [WTs, WIDs, Probs]
         # Each element above has (MaxPrior, MaxContext, MaxJoint)
         # sortedContextWTs: Titles sorted in decreasing context prob
-        (evWTs, sortedContextWTs) = evaluate_inference.evaluateEL(
+        (jointProbs_list,
+         evWTs,
+         sortedContextWTs) = evaluate_inference.evaluateEL(
             condProbs_list, widIdxs_list, contextProbs_list,
             self.reader.idx2knwid, self.reader.wid2WikiTitle,
             verbose=False)
 
         return (predLabelScoresnumpymat_list,
                 widIdxs_list, condProbs_list, contextProbs_list,
-                evWTs, pred_TypeSetsList)
-
-
+                jointProbs_list, evWTs, pred_TypeSetsList)
 
 
     def dataset_test(self, ckptpath=None):
@@ -617,15 +628,15 @@ class ELModel(Model):
         #   self.reader.idx2label)
         # evaluate.types_predictions(
         #   trueLabelScoresnumpymat_list, predLabelScoresnumpymat_list)
-        (condContextJointProbs_list, evWTs,
+        (jointProbs_list,
+         evWTs,
          sortedContextWTs) = evaluate_el.evaluateEL(
             condProbs_list, widIdxs_list, contextProbs_list,
             self.reader.idx2knwid, self.reader.wid2WikiTitle,
             verbose=False)
 
         return (widIdxs_list, condProbs_list, contextProbs_list,
-                condContextJointProbs_list, evWTs, sortedContextWTs)
-    #end test
+                jointProbs_list, evWTs, sortedContextWTs)
 
     def softmax(self, scores):
         expc = np.exp(scores)

@@ -96,6 +96,7 @@ def computeMaxPriorContextJointEntities(
 
     return (evaluationWikiTitles, sortedContextWTs)
 
+
 def convertWidIdxs2WikiTitlesAndWIDs(widIdxs_list, idx2knwid, wid2WikiTitle):
     wikiTitles_list = []
     WIDS_list = []
@@ -106,6 +107,7 @@ def convertWidIdxs2WikiTitlesAndWIDs(widIdxs_list, idx2knwid, wid2WikiTitle):
         wikiTitles_list.append(wikititles)
 
     return (WIDS_list, wikiTitles_list)
+
 
 def _normalizeProbList(probList):
     norm_probList = []
@@ -148,7 +150,8 @@ def computeFinalEntityScores(condProbs_list, contextProbs_list, alpha=0.5):
     return condContextJointProbs_list
 
 
-################################################################################
+##############################################################################
+
 def evaluateEL(condProbs_list, widIdxs_list, contextProbs_list,
                idx2knwid, wid2WikiTitle, verbose=False):
     ''' Prior entity prob, True and candidate entity WIDs, Predicted ent. prob.
@@ -170,14 +173,15 @@ def evaluateEL(condProbs_list, widIdxs_list, contextProbs_list,
     alpha = 0.5
     #for alpha in alpha_range:
     print("Alpha : {}".format(alpha))
-    condContextJointProbs_list = computeFinalEntityProbs(
+    jointProbs_list = computeFinalEntityProbs(
       condProbs_list, contextProbs_list, alpha=alpha)
 
     # evaluationWikiTitles:
     #     For each mention [(trWT, maxPWT, maxCWT, maxJWT), (trWID, ...)]
-    (evaluationWikiTitles, sortedContextWTs) = computeMaxPriorContextJointEntities(
-      WIDS_list, wikiTitles_list, condProbs_list, contextProbs_list,
-      condContextJointProbs_list, verbose)
+    (evaluationWikiTitles,
+     sortedContextWTs) = computeMaxPriorContextJointEntities(
+        WIDS_list, wikiTitles_list, condProbs_list, contextProbs_list,
+        jointProbs_list, verbose)
 
 
     '''
@@ -189,15 +193,16 @@ def evaluateEL(condProbs_list, widIdxs_list, contextProbs_list,
       condContextJointScores_list, verbose)
     '''
 
+    return (jointProbs_list, evaluationWikiTitles, sortedContextWTs)
 
-    return (condContextJointProbs_list, evaluationWikiTitles,
-            sortedContextWTs)
-################################################################################
+##############################################################################
+
 
 def f1(p,r):
     if p == 0.0 and r == 0.0:
         return 0.0
     return (float(2*p*r))/(p + r)
+
 
 def strict_pred(true_label_batch, pred_score_batch):
     ''' Calculates strict precision/recall/f1 given truth and predicted scores
@@ -221,6 +226,7 @@ def strict_pred(true_label_batch, pred_score_batch):
     precision = recall = float(correct_preds)/num_instanes
 
     return correct_preds, precision
+
 
 def correct_context_prediction(entity_posterior_scores, batch_size):
     bool_array = np.equal(np.argmax(entity_posterior_scores, axis=1),

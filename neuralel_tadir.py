@@ -1,12 +1,19 @@
 import os
 import sys
 import copy
+import json
 import pprint
 import numpy as np
 import tensorflow as tf
+from os import listdir
+from os.path import isfile, join
+
+from ccg_nlpy.core.view import View
+from ccg_nlpy.core.text_annotation import TextAnnotation
 
 from readers.inference_reader import InferenceReader
 from readers.test_reader import TestDataReader
+from readers.textanno_test_reader import TextAnnoTestReader
 from models.figer_model.el_model import ELModel
 from readers.config import Config
 from readers.vocabloader import VocabLoader
@@ -56,6 +63,11 @@ flags.DEFINE_string("config", 'configs/config.ini',
                     "VocabConfig Filepath")
 flags.DEFINE_string("test_out_fp", "", "Write Test Prediction Data")
 
+flags.DEFINE_string("tadirpath", "", "Director containing all the text-annos")
+flags.DEFINE_string("taoutdirpath", "", "Director containing all the text-annos")
+
+
+
 FLAGS = flags.FLAGS
 
 
@@ -64,6 +76,19 @@ def FLAGS_check(FLAGS):
         print("*** Local and Document context required ***")
         sys.exit(0)
     assert os.path.exists(FLAGS.model_path), "Model path doesn't exist."
+
+    assert(FLAGS.mode == 'ta'), "Only mode == ta allowed"
+
+
+def getAllTAFilePaths(FLAGS):
+    tadir = FLAGS.tadirpath
+    taoutdirpath = FLAGS.taoutdirpath
+    onlyfiles = [f for f in listdir(tadir) if isfile(join(tadir, f))]
+    ta_files = [os.path.join(tadir, fname) for fname in onlyfiles]
+
+    output_ta_files = [os.path.join(taoutdirpath, fname) for fname in onlyfiles]
+
+    return (ta_files, output_ta_files)
 
 
 def main(_):
@@ -74,40 +99,26 @@ def main(_):
     config = Config(FLAGS.config, verbose=False)
     vocabloader = VocabLoader(config)
 
-    if FLAGS.mode == 'inference':
-        FLAGS.dropout_keep_prob = 1.0
-        FLAGS.wordDropoutKeep = 1.0
-        FLAGS.cohDropoutKeep = 1.0
+    FLAGS.dropout_keep_prob = 1.0
+    FLAGS.wordDropoutKeep = 1.0
+    FLAGS.cohDropoutKeep = 1.0
 
-        reader = InferenceReader(config=config,
-                                 vocabloader=vocabloader,
-                                 test_mens_file=config.test_file,
-                                 num_cands=FLAGS.num_cand_entities,
-                                 batch_size=FLAGS.batch_size,
-                                 strict_context=FLAGS.strict_context,
-                                 pretrain_wordembed=FLAGS.pretrain_wordembed,
-                                 coherence=FLAGS.coherence)
-        docta = reader.ccgdoc
-        model_mode = 'test'
+    (intput_ta_files, output_ta_files) = getAllTAFilePaths(FLAGS)
 
-    if FLAGS.mode == 'test':
-        FLAGS.dropout_keep_prob = 1.0
-        FLAGS.wordDropoutKeep = 1.0
-        FLAGS.cohDropoutKeep = 1.0
+    print("TOTAL NUMBER OF TAS : {}".format(len(intput_ta_files)))
 
-        reader = TestDataReader(config=config,
-                                vocabloader=vocabloader,
-                                test_mens_file=config.test_file,
-                                num_cands=30,
-                                batch_size=FLAGS.batch_size,
-                                strict_context=FLAGS.strict_context,
-                                pretrain_wordembed=FLAGS.pretrain_wordembed,
-                                coherence=FLAGS.coherence)
-        model_mode = 'test'
+    reader = TextAnnoTestReader(
+        config=config,
+        vocabloader=vocabloader,
+        # test_mens_file=config.test_file,
+        num_cands=30,
+        batch_size=FLAGS.batch_size,
+        strict_context=FLAGS.strict_context,
+        pretrain_wordembed=FLAGS.pretrain_wordembed,
+        coherence=FLAGS.coherence)
+    model_mode = 'test'
 
-    else:
-        print("MODE in FLAGS is incorrect : {}".format(FLAGS.mode))
-        sys.exit()
+
 
     config_proto = tf.ConfigProto()
     config_proto.allow_soft_placement = True
@@ -143,97 +154,83 @@ def main(_):
             Fsize=FLAGS.Fsize,
             entyping=FLAGS.entyping)
 
-        if FLAGS.mode == 'inference':
-            print("Doing inference")
+        model.load_ckpt_model(ckptpath=FLAGS.model_path)
+
+        print("Total files: {}".format(len(output_ta_files)))
+        erroneous_files = 0
+        for in_ta_path, out_ta_path in zip(intput_ta_files, output_ta_files):
+            # print("Running the inference for : {}".format(in_ta_path))
+            try:
+                reader.new_test_file(in_ta_path)
+            except:
+                print("Error reading : {}".format(in_ta_path))
+                erroneous_files += 1
+                continue
+
             (predTypScNPmat_list,
              widIdxs_list,
              priorProbs_list,
              textProbs_list,
              jointProbs_list,
              evWTs_list,
-             pred_TypeSetsList) = model.inference(ckptpath=FLAGS.model_path)
+             pred_TypeSetsList) = model.inference_run()
 
+            # model.inference(ckptpath=FLAGS.model_path)
+
+            wiki_view = copy.deepcopy(reader.textanno.get_view("NER"))
+            # wiki_view_json = copy.deepcopy(reader.textanno.get_view("NER").as_json)
+            docta = reader.textanno
+
+            el_cons_list = wiki_view.cons_list
             numMentionsInference = len(widIdxs_list)
-            numMentionsReader = 0
-            for sent_idx in reader.sentidx2ners:
-                numMentionsReader += len(reader.sentidx2ners[sent_idx])
-            assert numMentionsInference == numMentionsReader
+
+            # print("Number of mentions in model: {}".format(len(widIdxs_list)))
+            # print("Number of NER mention: {}".format(len(el_cons_list)))
+
+            assert len(el_cons_list) == numMentionsInference
 
             mentionnum = 0
-            entityTitleList = []
-            for sent_idx in reader.sentidx2ners:
-                nerDicts = reader.sentidx2ners[sent_idx]
-                sentence = ' '.join(reader.sentences_tokenized[sent_idx])
-                for s, ner in nerDicts:
-                    [evWTs, evWIDS, evProbs] = evWTs_list[mentionnum]
-                    predTypes = pred_TypeSetsList[mentionnum]
-                    print(reader.bracketMentionInSentence(sentence, ner))
-                    print("Prior: {} {}, Context: {} {}, Joint: {} {}".format(
-                        evWTs[0], evProbs[0], evWTs[1], evProbs[1],
-                        evWTs[2], evProbs[2]))
+            for ner_cons in el_cons_list:
+                priorScoreMap = {}
+                contextScoreMap = {}
+                jointScoreMap = {}
 
-                    entityTitleList.append(evWTs[2])
-                    print("Predicted Entity Types : {}".format(predTypes))
-                    print("\n")
-                    mentionnum += 1
+                (wididxs, pps, mps, jps) = (widIdxs_list[mentionnum],
+                                            priorProbs_list[mentionnum],
+                                            textProbs_list[mentionnum],
+                                            jointProbs_list[mentionnum])
 
-            elview = copy.deepcopy(docta.view_dictionary['NER_CONLL'])
-            elview.view_name = 'ENG_NEURAL_EL'
-            for i, cons in enumerate(elview.cons_list):
-                cons['label'] = entityTitleList[i]
+                maxJointProb = 0.0
+                maxJointEntity = ""
+                for (wididx, prp, mp, jp) in zip(wididxs, pps, mps, jps):
+                    wT = reader.widIdx2WikiTitle(wididx)
+                    priorScoreMap[wT] = prp
+                    contextScoreMap[wT] = mp
+                    jointScoreMap[wT] = jp
 
-            docta.view_dictionary['ENG_NEURAL_EL'] = elview
-
-            print("elview.cons_list")
-            print(elview.cons_list)
-            print("\n")
-
-            for v in docta.as_json['views']:
-                print(v)
-                print("\n")
-
-        elif FLAGS.mode == 'test':
-            print("Testing on Data ")
-            (widIdxs_list, condProbs_list, contextProbs_list,
-             condContextJointProbs_list, evWTs,
-             sortedContextWTs) = model.dataset_test(ckptpath=FLAGS.model_path)
-
-            print(len(widIdxs_list))
-            print(len(condProbs_list))
-            print(len(contextProbs_list))
-            print(len(condContextJointProbs_list))
-            print(len(reader.mentions))
+                    if jp > maxJointProb:
+                        maxJointProb = jp
+                        maxJointEntity = wT
 
 
-            print("Writing Test Predictions: {}".format(FLAGS.test_out_fp))
-            with open(FLAGS.test_out_fp, 'w') as f:
-                for (wididxs, pps, mps, jps) in zip(widIdxs_list,
-                                                    condProbs_list,
-                                                    contextProbs_list,
-                                                    condContextJointProbs_list):
+                ''' add labels2score map here '''
+                ner_cons["jointScoreMap"] = jointScoreMap
+                ner_cons["contextScoreMap"] = contextScoreMap
+                ner_cons["priorScoreMap"] = priorScoreMap
 
-                    mentionPred = ""
+                # add max scoring entity as label
+                ner_cons["label"] = maxJointEntity
+                ner_cons["score"] = maxJointProb
 
-                    for (wididx, prp, mp, jp) in zip(wididxs, pps, mps, jps):
-                        wit = reader.widIdx2WikiTitle(wididx)
-                        mentionPred += wit + " " + str(prp) + " " + \
-                            str(mp) + " " + str(jp)
-                        mentionPred += "\t"
+                mentionnum += 1
 
-                    mentionPred = mentionPred.strip() + "\n"
+            wiki_view.view_name = "NEUREL"
+            docta.view_dictionary["NEUREL"] = wiki_view
 
-                    f.write(mentionPred)
+            docta_json = docta.as_json
+            json.dump(docta_json, open(out_ta_path, "w"), indent=True)
 
-            print("Done writing. Can Exit.")
-
-        else:
-            print("WRONG MODE!")
-            sys.exit(0)
-
-
-
-
-
+        print("Number of erroneous files: {}".format(erroneous_files))
     sys.exit()
 
 if __name__ == '__main__':

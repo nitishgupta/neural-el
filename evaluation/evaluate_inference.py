@@ -104,12 +104,14 @@ def computeFinalEntityScores(condProbs_list, contextProbs_list, alpha=0.5):
     return condContextJointProbs_list
 
 
-################################################################################
+#############################################################################
+
+
 def evaluateEL(condProbs_list, widIdxs_list, contextProbs_list,
                idx2knwid, wid2WikiTitle, verbose=False):
     ''' Prior entity prob, True and candidate entity WIDs, Predicted ent. prob.
-    using context for each of te 30 candidates. First element in the candidates is
-    the true entity.
+    using context for each of te 30 candidates. First element in the candidates
+    is the true entity.
     Args:
       For each mention:
         condProbs_list: List of prior probs for 30 candidates.
@@ -118,25 +120,28 @@ def evaluateEL(condProbs_list, widIdxs_list, contextProbs_list,
       idx2knwid: Map for widIdx -> WID
       wid2WikiTitle: Map from WID -> WikiTitle
     '''
-    print("Evaluating E-Linking ... ")
+    # print("Evaluating E-Linking ... ")
     (WIDS_list, wikiTitles_list) = convertWidIdxs2WikiTitlesAndWIDs(
       widIdxs_list, idx2knwid, wid2WikiTitle)
 
-    condContextJointProbs_list = computeFinalEntityProbs(
-      condProbs_list, contextProbs_list)
+    jointProbs_list = computeFinalEntityProbs(condProbs_list,
+                                              contextProbs_list)
 
     (evaluationWikiTitles,
      sortedContextWTs) = computeMaxPriorContextJointEntities(
         WIDS_list, wikiTitles_list, condProbs_list, contextProbs_list,
-        condContextJointProbs_list, verbose)
+        jointProbs_list, verbose)
 
-    return (evaluationWikiTitles, sortedContextWTs)
-################################################################################
+    return (jointProbs_list, evaluationWikiTitles, sortedContextWTs)
+
+##############################################################################
+
 
 def f1(p,r):
     if p == 0.0 and r == 0.0:
         return 0.0
     return (float(2*p*r))/(p + r)
+
 
 def strict_pred(true_label_batch, pred_score_batch):
     ''' Calculates strict precision/recall/f1 given truth and predicted scores
@@ -160,6 +165,7 @@ def strict_pred(true_label_batch, pred_score_batch):
     precision = recall = float(correct_preds)/num_instanes
 
     return correct_preds, precision
+
 
 def correct_context_prediction(entity_posterior_scores, batch_size):
     bool_array = np.equal(np.argmax(entity_posterior_scores, axis=1),

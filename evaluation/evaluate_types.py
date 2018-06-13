@@ -130,7 +130,7 @@ def performTypingEvaluation(predLabelScoresnumpymat_list, idx2label):
 
 
 def evaluate(predLabelScoresnumpymat_list, idx2label):
-    print("Evaluating Typing ... ")
+    # print("Evaluating Typing ... ")
     pred_TypeSetsList = convertTypesScoreMatLists_TypeSets(
         typeScoreMat_list=predLabelScoresnumpymat_list, idx2label=idx2label,
         threshold=0.75)
