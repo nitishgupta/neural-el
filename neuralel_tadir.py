@@ -231,6 +231,7 @@ def main(_):
             json.dump(docta_json, open(out_ta_path, "w"), indent=True)
 
         print("Number of erroneous files: {}".format(erroneous_files))
+        print("Annotation completed. Program can be exited safely.")
     sys.exit()
 
 if __name__ == '__main__':
