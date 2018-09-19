@@ -11,10 +11,12 @@ from ccg_nlpy.core.text_annotation import TextAnnotation
 start_word = "<s>"
 end_word = "<eos>"
 
+# Reader for Text Annotations
 class TextAnnoTestReader(object):
     def __init__(self, config, vocabloader,
                  num_cands, batch_size, strict_context=True,
-                 pretrain_wordembed=True, coherence=True):
+                 pretrain_wordembed=True, coherence=True,
+                 nerviewname="NER_CONLL"):
         self.typeOfReader = "inference"
         self.start_word = start_word
         self.end_word = end_word
@@ -24,6 +26,7 @@ class TextAnnoTestReader(object):
         self.tr_unsup = 'tr_unsup'
         self.pretrain_wordembed = pretrain_wordembed
         self.coherence = coherence
+        self.nerviewname = nerviewname
 
         # Word Vocab
         (self.word2idx, self.idx2word) = vocabloader.getGloveWordVocab()
@@ -110,6 +113,29 @@ class TextAnnoTestReader(object):
         self.num_mens = len(self.mentions)
         self.epochs = 0
 
+    def new_tajsonstr(self, tajsonstr):
+        """ tajsonstr is a json str of a TA """
+        ta = TextAnnotation(json_str=tajsonstr)
+        self.new_ta(ta)
+
+    def new_ta(self, ta):
+        self.textanno = ta
+
+        (sentences_tokenized, modified_ner_cons_list) = self.processTestDoc(ta)
+
+        self.mention_lines = self.convertSent2NerToMentionLines(
+            sentences_tokenized, modified_ner_cons_list)
+
+        self.mentions = []
+        for line in self.mention_lines:
+            m = Mention(line)
+            self.mentions.append(m)
+
+        self.men_idx = 0
+        self.num_mens = len(self.mentions)
+        self.epochs = 0
+
+
 
     def get_vector(self, word):
         if word in self.word2vec:
@@ -138,7 +164,7 @@ class TextAnnoTestReader(object):
         # List of ner dicts from ccg pipeline
         ner_cons_list = []
         try:
-            ner_cons_list = ccgdoc.get_view("NER").cons_list
+            ner_cons_list = ccgdoc.get_view(self.nerviewname).cons_list
         except:
             print("NO NAMED ENTITIES IN THE DOC. EXITING")
 
@@ -401,7 +427,6 @@ if __name__ == '__main__':
     vocabloader = VocabLoader(config)
     b = TextAnnoTestReader(config=config,
                            vocabloader=vocabloader,
-                           test_mens_file=config.test_file,
                            num_cands=30,
                            batch_size=batch_size,
                            strict_context=False,

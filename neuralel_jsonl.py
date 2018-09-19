@@ -10,9 +10,7 @@ from os.path import isfile, join
 
 from ccg_nlpy.core.view import View
 from ccg_nlpy.core.text_annotation import TextAnnotation
-
-from readers.inference_reader import InferenceReader
-from readers.test_reader import TestDataReader
+from ccg_nlpy.local_pipeline import LocalPipeline
 from readers.textanno_test_reader import TextAnnoTestReader
 from models.figer_model.el_model import ELModel
 from readers.config import Config
@@ -63,12 +61,14 @@ flags.DEFINE_string("config", 'configs/config.ini',
                     "VocabConfig Filepath")
 flags.DEFINE_string("test_out_fp", "", "Write Test Prediction Data")
 
-flags.DEFINE_string("tadirpath", "", "Director containing all the text-annos")
-flags.DEFINE_string("taoutdirpath", "", "Director containing all the text-annos")
-
-
+flags.DEFINE_string("input_jsonl", "", "Input containing documents in jsonl")
+flags.DEFINE_string("output_jsonl", "", "Output in jsonl format")
+flags.DEFINE_string("doc_key", "", "Key in input_jsonl containing documents")
+flags.DEFINE_boolean("pretokenized", False, "Is the input text pretokenized")
 
 FLAGS = flags.FLAGS
+
+localpipeline = LocalPipeline()
 
 
 def FLAGS_check(FLAGS):
@@ -78,17 +78,6 @@ def FLAGS_check(FLAGS):
     assert os.path.exists(FLAGS.model_path), "Model path doesn't exist."
 
     assert(FLAGS.mode == 'ta'), "Only mode == ta allowed"
-
-
-def getAllTAFilePaths(FLAGS):
-    tadir = FLAGS.tadirpath
-    taoutdirpath = FLAGS.taoutdirpath
-    onlyfiles = [f for f in listdir(tadir) if isfile(join(tadir, f))]
-    ta_files = [os.path.join(tadir, fname) for fname in onlyfiles]
-
-    output_ta_files = [os.path.join(taoutdirpath, fname) for fname in onlyfiles]
-
-    return (ta_files, output_ta_files)
 
 
 def main(_):
@@ -103,9 +92,9 @@ def main(_):
     FLAGS.wordDropoutKeep = 1.0
     FLAGS.cohDropoutKeep = 1.0
 
-    (intput_ta_files, output_ta_files) = getAllTAFilePaths(FLAGS)
-
-    print("TOTAL NUMBER OF TAS : {}".format(len(intput_ta_files)))
+    input_jsonl = FLAGS.input_jsonl
+    output_jsonl = FLAGS.output_jsonl
+    doc_key = FLAGS.doc_key
 
     reader = TextAnnoTestReader(
         config=config,
@@ -114,9 +103,7 @@ def main(_):
         batch_size=FLAGS.batch_size,
         strict_context=FLAGS.strict_context,
         pretrain_wordembed=FLAGS.pretrain_wordembed,
-        coherence=FLAGS.coherence,
-        nerviewname="NER")
-
+        coherence=FLAGS.coherence)
     model_mode = 'test'
 
     config_proto = tf.ConfigProto()
@@ -155,16 +142,19 @@ def main(_):
 
         model.load_ckpt_model(ckptpath=FLAGS.model_path)
 
-        print("Total files: {}".format(len(output_ta_files)))
         erroneous_files = 0
-        for in_ta_path, out_ta_path in zip(intput_ta_files, output_ta_files):
-            # print("Running the inference for : {}".format(in_ta_path))
-            try:
-                reader.new_test_file(in_ta_path)
-            except:
-                print("Error reading : {}".format(in_ta_path))
-                erroneous_files += 1
-                continue
+
+        outf = open(output_jsonl, 'w')
+        inpf = open(input_jsonl, 'r')
+
+        for line in inpf:
+            jsonobj = json.loads(line)
+            doctext = jsonobj[doc_key]
+            ta = localpipeline.doc(doctext, pretokenized=FLAGS.pretokenized)
+            _ = ta.get_ner_conll
+
+            # Make instances for this document
+            reader.new_ta(ta)
 
             (predTypScNPmat_list,
              widIdxs_list,
@@ -174,21 +164,25 @@ def main(_):
              evWTs_list,
              pred_TypeSetsList) = model.inference_run()
 
-            # model.inference(ckptpath=FLAGS.model_path)
-
-            wiki_view = copy.deepcopy(reader.textanno.get_view("NER"))
+            wiki_view = copy.deepcopy(reader.textanno.get_view("NER_CONLL"))
             docta = reader.textanno
 
             el_cons_list = wiki_view.cons_list
             numMentionsInference = len(widIdxs_list)
 
-            # print("Number of mentions in model: {}".format(len(widIdxs_list)))
-            # print("Number of NER mention: {}".format(len(el_cons_list)))
-
             assert len(el_cons_list) == numMentionsInference
+
+            out_dict = {doc_key: doctext}
+            el_mentions = []
 
             mentionnum = 0
             for ner_cons in el_cons_list:
+                # ner_cons is a dict
+                mentiondict = {}
+                mentiondict['tokens'] = ner_cons['tokens']
+                mentiondict['end'] = ner_cons['end']
+                mentiondict['start'] = ner_cons['start']
+
                 priorScoreMap = {}
                 contextScoreMap = {}
                 jointScoreMap = {}
@@ -210,23 +204,25 @@ def main(_):
                         maxJointProb = jp
                         maxJointEntity = wT
 
-
-                ''' add labels2score map here '''
-                ner_cons["jointScoreMap"] = jointScoreMap
-                ner_cons["contextScoreMap"] = contextScoreMap
-                ner_cons["priorScoreMap"] = priorScoreMap
+                mentiondict["jointScoreMap"] = jointScoreMap
+                mentiondict["contextScoreMap"] = contextScoreMap
+                mentiondict["priorScoreMap"] = priorScoreMap
 
                 # add max scoring entity as label
-                ner_cons["label"] = maxJointEntity
-                ner_cons["score"] = maxJointProb
+                mentiondict["label"] = maxJointEntity
+                mentiondict["score"] = maxJointProb
 
                 mentionnum += 1
 
-            wiki_view.view_name = "NEUREL"
-            docta.view_dictionary["NEUREL"] = wiki_view
+                el_mentions.append(mentiondict)
 
-            docta_json = docta.as_json
-            json.dump(docta_json, open(out_ta_path, "w"), indent=True)
+            out_dict['nel'] = el_mentions
+            outstr = json.dumps(out_dict)
+            outf.write(outstr)
+            outf.write("\n")
+
+        outf.close()
+        inpf.close()
 
         print("Number of erroneous files: {}".format(erroneous_files))
         print("Annotation completed. Program can be exited safely.")
