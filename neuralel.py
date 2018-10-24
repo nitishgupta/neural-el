@@ -73,6 +73,7 @@ def main(_):
 
     config = Config(FLAGS.config, verbose=False)
     vocabloader = VocabLoader(config)
+    
     if FLAGS.mode == 'inference':
         FLAGS.dropout_keep_prob = 1.0
         FLAGS.wordDropoutKeep = 1.0
