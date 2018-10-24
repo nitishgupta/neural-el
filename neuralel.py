@@ -73,7 +73,7 @@ def main(_):
 
     config = Config(FLAGS.config, verbose=False)
     vocabloader = VocabLoader(config)
-
+    
     if FLAGS.mode == 'inference':
         FLAGS.dropout_keep_prob = 1.0
         FLAGS.wordDropoutKeep = 1.0
@@ -88,9 +88,9 @@ def main(_):
                                  pretrain_wordembed=FLAGS.pretrain_wordembed,
                                  coherence=FLAGS.coherence)
         docta = reader.ccgdoc
-        model_mode = 'test'
+        model_mode = 'inference'
 
-    if FLAGS.mode == 'test':
+    elif FLAGS.mode == 'test':
         FLAGS.dropout_keep_prob = 1.0
         FLAGS.wordDropoutKeep = 1.0
         FLAGS.cohDropoutKeep = 1.0
