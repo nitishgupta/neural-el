@@ -15,7 +15,7 @@ class InferenceReader(object):
                  num_cands, batch_size, strict_context=True,
                  pretrain_wordembed=True, coherence=True):
         self.pipeline = remote_pipeline.RemotePipeline(
-            server_api='http://austen.cs.illinois.edu:5800')
+            server_api='http://macniece.seas.upenn.edu:4001')
         self.typeOfReader = "inference"
         self.start_word = start_word
         self.end_word = end_word
