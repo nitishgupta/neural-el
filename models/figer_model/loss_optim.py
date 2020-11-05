@@ -13,6 +13,12 @@ class LossOptim(object):
         self.figermodel = figermodel
 
     def make_loss_graph(self):
+        """
+        Make the loss graph.
+
+        Args:
+            self: (todo): write your description
+        """
         self.figermodel.labeling_model.loss_graph(
           true_label_ids=self.figermodel.labels_batch,
           scope_name=self.figermodel.labeling_loss_scope,
@@ -30,6 +36,14 @@ class LossOptim(object):
               device_gpu=self.figermodel.device_placements['gpu'])
 
     def optimizer(self, optimizer_name, name):
+        """
+        Optimize the optimizer.
+
+        Args:
+            self: (todo): write your description
+            optimizer_name: (str): write your description
+            name: (str): write your description
+        """
         if optimizer_name == 'adam':
             optimizer = tf.train.AdamOptimizer(
               learning_rate=self.figermodel.learning_rate,
@@ -57,6 +71,13 @@ class LossOptim(object):
         return optimizer
 
     def weight_regularization(self, trainable_vars):
+        """
+        Create a regularization loss.
+
+        Args:
+            self: (todo): write your description
+            trainable_vars: (bool): write your description
+        """
         vars_to_regularize = []
         regularization_loss = 0
         for var in trainable_vars:
@@ -69,6 +90,14 @@ class LossOptim(object):
         return regularization_loss
 
     def label_optimization(self, trainable_vars, optim_scope):
+        """
+        Perform the optimizer.
+
+        Args:
+            self: (todo): write your description
+            trainable_vars: (bool): write your description
+            optim_scope: (int): write your description
+        """
         # Typing Loss
         if self.figermodel.typing:
             self.labeling_loss = self.figermodel.labeling_model.labeling_loss
@@ -120,6 +149,13 @@ class LossOptim(object):
             self.optim_op = self.optimizer.apply_gradients(self.gvs)
 
     def clip_gradients(self, gvs):
+        """
+        Clipped gradients.
+
+        Args:
+            self: (todo): write your description
+            gvs: (todo): write your description
+        """
         clipped_gvs = []
         for (g,v) in gvs:
             if self.figermodel.embeddings_scope in v.name:

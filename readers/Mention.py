@@ -31,6 +31,12 @@ class Mention(object):
     #enddef
 
     def toString(self):
+        """
+        Returns a string representation of the sentence.
+
+        Args:
+            self: (todo): write your description
+        """
         outstr = self.wid + "\t"
         outstr += self.wikititle + "\t"
         for i in range(1, len(self.sent_tokens)):

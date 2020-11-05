@@ -95,6 +95,13 @@ def typesPredictionStats(pred_labels, true_labels):
             loose_macro_p, loose_macro_r)
 
 def typesEvaluationMetrics(pred_TypeSetsList, true_TypeSetsList):
+    """
+    Return a list of - empirical metrics.
+
+    Args:
+        pred_TypeSetsList: (list): write your description
+        true_TypeSetsList: (todo): write your description
+    """
     num_instances = len(true_TypeSetsList)
     (t_i, t_th_exact, t_h_c, t_c, l_m_p, l_m_r) = typesPredictionStats(
       pred_labels=pred_TypeSetsList, true_labels=true_TypeSetsList)
@@ -130,6 +137,13 @@ def performTypingEvaluation(predLabelScoresnumpymat_list, idx2label):
 
 
 def evaluate(predLabelScoresnumpymat_list, idx2label):
+    """
+    Evaluate the classification of a list of label.
+
+    Args:
+        predLabelScoresnumpymat_list: (int): write your description
+        idx2label: (str): write your description
+    """
     # print("Evaluating Typing ... ")
     pred_TypeSetsList = convertTypesScoreMatLists_TypeSets(
         typeScoreMat_list=predLabelScoresnumpymat_list, idx2label=idx2label,
@@ -139,6 +153,13 @@ def evaluate(predLabelScoresnumpymat_list, idx2label):
 
 
 def f1(p,r):
+    """
+    Convert f1 ( r2
+
+    Args:
+        p: (int): write your description
+        r: (int): write your description
+    """
     if p == 0.0 and r == 0.0:
         return 0.0
     return (float(2*p*r))/(p + r)
@@ -168,6 +189,13 @@ def strict_pred(true_label_batch, pred_score_batch):
     return correct_preds, precision
 
 def correct_context_prediction(entity_posterior_scores, batch_size):
+    """
+    Corrects the predicted_posterior.
+
+    Args:
+        entity_posterior_scores: (todo): write your description
+        batch_size: (int): write your description
+    """
     bool_array = np.equal(np.argmax(entity_posterior_scores, axis=1),
                           [0]*batch_size)
     correct_preds = np.sum(bool_array)

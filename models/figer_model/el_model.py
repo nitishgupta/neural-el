@@ -31,6 +31,39 @@ class ELModel(Model):
                  pretrain_word_embed=True, typing=True, el=True,
                  coherence=False, textcontext=False, useCNN=False,
                  WDLength=100, Fsize=5, entyping=True):
+        """
+        Initialize the encoder.
+
+        Args:
+            self: (todo): write your description
+            sess: (todo): write your description
+            reader: (todo): write your description
+            dataset: (todo): write your description
+            max_steps: (int): write your description
+            pretrain_max_steps: (int): write your description
+            word_embed_dim: (int): write your description
+            context_encoded_dim: (str): write your description
+            context_encoder_lstmsize: (int): write your description
+            context_encoder_num_layers: (int): write your description
+            coherence_numlayers: (int): write your description
+            jointff_numlayers: (int): write your description
+            learning_rate: (float): write your description
+            dropout_keep_prob: (str): write your description
+            reg_constant: (str): write your description
+            checkpoint_dir: (str): write your description
+            optimizer: (todo): write your description
+            mode: (todo): write your description
+            strict: (bool): write your description
+            pretrain_word_embed: (bool): write your description
+            typing: (todo): write your description
+            el: (todo): write your description
+            coherence: (todo): write your description
+            textcontext: (str): write your description
+            useCNN: (todo): write your description
+            WDLength: (int): write your description
+            Fsize: (int): write your description
+            entyping: (todo): write your description
+        """
         self.optimizer = optimizer
         self.mode = mode
         self.sess = sess
@@ -233,6 +266,12 @@ class ELModel(Model):
 
 
     def build_placeholders(self):
+        """
+        Builds placeholders from the model.
+
+        Args:
+            self: (todo): write your description
+        """
         # Left Context
         self.left_batch = tf.placeholder(
           tf.int32, [self.batch_size, None], name="left_batch")
@@ -294,6 +333,12 @@ class ELModel(Model):
                         mean=0.0, stddev=(1.0/100.0)))
 
     def training_setup(self):
+        """
+        Setup the optimizer.
+
+        Args:
+            self: (todo): write your description
+        """
         # Make the loss graph
         print("[#] Making Loss Graph ....")
         self.loss_optim.make_loss_graph()
@@ -307,6 +352,12 @@ class ELModel(Model):
         self.print_variables_in_collection(tf.trainable_variables())
 
     def training(self):
+        """
+        Training function.
+
+        Args:
+            self: (todo): write your description
+        """
         self.training_setup()
         vars_tostore = tf.all_variables()
         saver = tf.train.Saver(var_list=vars_tostore, max_to_keep=30)
@@ -440,6 +491,13 @@ class ELModel(Model):
 
     # #####################      TEST     ##################################
     def load_ckpt_model(self, ckptpath=None):
+        """
+        Loads a tf model from disk.
+
+        Args:
+            self: (todo): write your description
+            ckptpath: (str): write your description
+        """
         saver = tf.train.Saver(var_list=tf.all_variables())
         # (Try) Load all pretraining model variables
         print("Loading pre-saved model...")
@@ -453,6 +511,13 @@ class ELModel(Model):
 
 
     def inference(self, ckptpath=None):
+        """
+        Run inference.
+
+        Args:
+            self: (todo): write your description
+            ckptpath: (str): write your description
+        """
         saver = tf.train.Saver(var_list=tf.all_variables())
         # (Try) Load all pretraining model variables
         print("Loading pre-saved model...")
@@ -468,6 +533,12 @@ class ELModel(Model):
         return r
 
     def inference_run(self):
+        """
+        Run inference.
+
+        Args:
+            self: (todo): write your description
+        """
         assert self.reader.typeOfReader == "inference"
         # assert self.reader.batch_size == 1
         self.reader.reset_test()
@@ -547,6 +618,13 @@ class ELModel(Model):
 
 
     def dataset_test(self, ckptpath=None):
+        """
+        Reads the test dataset.
+
+        Args:
+            self: (todo): write your description
+            ckptpath: (str): write your description
+        """
         saver = tf.train.Saver(var_list=tf.all_variables())
         # (Try) Load all pretraining model variables
         print("Loading pre-saved model...")
@@ -561,6 +639,12 @@ class ELModel(Model):
         return returns
 
     def dataset_performance(self):
+        """
+        Dataset on the model.
+
+        Args:
+            self: (todo): write your description
+        """
         print("Test accuracy starting ... ")
         assert self.reader.typeOfReader=="test"
         # assert self.reader.batch_size == 1
@@ -639,25 +723,58 @@ class ELModel(Model):
                 jointProbs_list, evWTs, sortedContextWTs)
 
     def softmax(self, scores):
+        """
+        Compute softmax function.
+
+        Args:
+            self: (todo): write your description
+            scores: (array): write your description
+        """
         expc = np.exp(scores)
         sumc = np.sum(expc)
         softmax_out = expc/sumc
         return softmax_out
 
     def print_all_variables(self):
+        """
+        Print all variables.
+
+        Args:
+            self: (todo): write your description
+        """
         print("All Variables in the graph : ")
         self.print_variables_in_collection(tf.all_variables())
 
     def print_trainable_variables(self):
+        """
+        Print variables and variables.
+
+        Args:
+            self: (todo): write your description
+        """
         print("All Trainable variables in the graph : ")
         self.print_variables_in_collection(tf.trainable_variables())
 
     def print_variables_in_collection(self, list_vars):
+        """
+        Print variables in the variables.
+
+        Args:
+            self: (todo): write your description
+            list_vars: (list): write your description
+        """
         print("Variables in list: ")
         for var in list_vars:
             print("  %s" % var.name)
 
     def extractEntityEmbeddings(self, ckptPath=None):
+        """
+        Extracts embeddings from a given word embeddings.
+
+        Args:
+            self: (todo): write your description
+            ckptPath: (str): write your description
+        """
         saver = tf.train.Saver(var_list=tf.all_variables())
         print("Loading pre-saved model...")
         load_status = self.loadCKPTPath(saver=saver, ckptPath=ckptPath)

@@ -10,6 +10,21 @@ class LabelingModel(Model):
     def __init__(self, batch_size, num_labels, context_encoded_dim,
                  true_entity_embeddings,
                  word_embed_dim, context_encoded, mention_embed, scope_name, device):
+        """
+        Initialize embeddings.
+
+        Args:
+            self: (todo): write your description
+            batch_size: (int): write your description
+            num_labels: (int): write your description
+            context_encoded_dim: (str): write your description
+            true_entity_embeddings: (todo): write your description
+            word_embed_dim: (int): write your description
+            context_encoded: (str): write your description
+            mention_embed: (str): write your description
+            scope_name: (str): write your description
+            device: (todo): write your description
+        """
 
         self.batch_size = batch_size
         self.num_labels = num_labels
@@ -42,6 +57,15 @@ class LabelingModel(Model):
 
 
     def loss_graph(self, true_label_ids, scope_name, device_gpu):
+        """
+        Perform a set of the model.
+
+        Args:
+            self: (todo): write your description
+            true_label_ids: (str): write your description
+            scope_name: (str): write your description
+            device_gpu: (todo): write your description
+        """
         with tf.variable_scope(scope_name) as s, tf.device(device_gpu) as d:
             # [B, L]
             self.cross_entropy_losses = tf.nn.sigmoid_cross_entropy_with_logits(

@@ -72,6 +72,12 @@ FLAGS = flags.FLAGS
 
 
 def FLAGS_check(FLAGS):
+    """
+    Checks if the modelcontext
+
+    Args:
+        FLAGS: (int): write your description
+    """
     if not (FLAGS.textcontext and FLAGS.coherence):
         print("*** Local and Document context required ***")
         sys.exit(0)
@@ -81,6 +87,12 @@ def FLAGS_check(FLAGS):
 
 
 def getAllTAFilePaths(FLAGS):
+    """
+    Return a list of all available directories.
+
+    Args:
+        FLAGS: (str): write your description
+    """
     tadir = FLAGS.tadirpath
     taoutdirpath = FLAGS.taoutdirpath
     onlyfiles = [f for f in listdir(tadir) if isfile(join(tadir, f))]
@@ -92,6 +104,12 @@ def getAllTAFilePaths(FLAGS):
 
 
 def main(_):
+    """
+    Main function.
+
+    Args:
+        _: (int): write your description
+    """
     pp.pprint(flags.FLAGS.__flags)
 
     FLAGS_check(FLAGS)

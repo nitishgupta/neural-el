@@ -13,10 +13,23 @@ import numpy as np
 from readers.Mention import Mention
 
 def save(fname, obj):
+    """
+    Save a python object.
+
+    Args:
+        fname: (str): write your description
+        obj: (todo): write your description
+    """
     with open(fname, 'wb') as f:
         pickle.dump(obj, f)
 
 def load(fname):
+    """
+    Load a pickle file.
+
+    Args:
+        fname: (str): write your description
+    """
     with open(fname, 'rb') as f:
         return pickle.load(f)
 
@@ -32,6 +45,12 @@ def _getLnrm(arg):
     return arg
 
 def load_crosswikis(crosswikis_pkl):
+    """
+    Loads the crosswik
+
+    Args:
+        crosswikis_pkl: (str): write your description
+    """
     stime = time.time()
     print("[#] Loading normalized crosswikis dictionary ... ")
     crosswikis_dict = load(crosswikis_pkl)
@@ -43,6 +62,12 @@ def load_crosswikis(crosswikis_pkl):
 
 def load_widSet(
     widWikititle_file="/save/ngupta19/freebase/types_xiao/wid.WikiTitle"):
+    """
+    Loads widgets from a text file.
+
+    Args:
+        widWikititle_file: (str): write your description
+    """
     print("Loading WIDs in the KB ... ")
     wids = set()
     with open(widWikititle_file, 'r') as f:
@@ -55,6 +80,13 @@ def load_widSet(
     return wids
 
 def make_mentions_from_file(mens_file, verbose=False):
+    """
+    Make list of mentionions from a file.
+
+    Args:
+        mens_file: (str): write your description
+        verbose: (bool): write your description
+    """
     stime = time.time()
     with open(mens_file, 'r') as f:
         mention_lines = f.read().strip().split("\n")
@@ -69,6 +101,12 @@ def make_mentions_from_file(mens_file, verbose=False):
 
 
 def get_mention_files(mentions_dir):
+    """
+    Return a list of the given directory.
+
+    Args:
+        mentions_dir: (str): write your description
+    """
     mention_files = []
     for (dirpath, dirnames, filenames) in os.walk(mentions_dir):
         mention_files.extend(filenames)
@@ -78,6 +116,12 @@ def get_mention_files(mentions_dir):
 
 
 def decrSortedDict(dict):
+    """
+    Decrides dict.
+
+    Args:
+        dict: (dict): write your description
+    """
     # Returns a list of tuples (key, value) in decreasing order of the values
     return sorted(dict.items(), key=lambda kv: kv[1], reverse=True)
 

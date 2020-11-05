@@ -9,6 +9,17 @@ coarseTypeIds = set([1,5,10,25])
 def computeMaxPriorContextJointEntities(
     WIDS_list, wikiTitles_list, condProbs_list, contextProbs_list,
     condContextJointProbs_list, verbose):
+    """
+    Computes a list of associations.
+
+    Args:
+        WIDS_list: (list): write your description
+        wikiTitles_list: (list): write your description
+        condProbs_list: (list): write your description
+        contextProbs_list: (list): write your description
+        condContextJointProbs_list: (todo): write your description
+        verbose: (int): write your description
+    """
 
     assert (len(wikiTitles_list) == len(condProbs_list) ==
             len(contextProbs_list) == len(condContextJointProbs_list))
@@ -98,6 +109,14 @@ def computeMaxPriorContextJointEntities(
 
 
 def convertWidIdxs2WikiTitlesAndWIDs(widIdxs_list, idx2knwid, wid2WikiTitle):
+    """
+    Convert widxs to widxs.
+
+    Args:
+        widIdxs_list: (list): write your description
+        idx2knwid: (int): write your description
+        wid2WikiTitle: (int): write your description
+    """
     wikiTitles_list = []
     WIDS_list = []
     for widIdxs in widIdxs_list:
@@ -110,6 +129,12 @@ def convertWidIdxs2WikiTitlesAndWIDs(widIdxs_list, idx2knwid, wid2WikiTitle):
 
 
 def _normalizeProbList(probList):
+    """
+    Normalize probabilities.
+
+    Args:
+        probList: (list): write your description
+    """
     norm_probList = []
     for probs in probList:
         s = sum(probs)
@@ -122,6 +147,14 @@ def _normalizeProbList(probList):
 
 
 def computeFinalEntityProbs(condProbs_list, contextProbs_list, alpha=0.5):
+    """
+    Compute a list of probabilities.
+
+    Args:
+        condProbs_list: (list): write your description
+        contextProbs_list: (list): write your description
+        alpha: (float): write your description
+    """
     condContextJointProbs_list = []
     condProbs_list = _normalizeProbList(condProbs_list)
     contextProbs_list = _normalizeProbList(contextProbs_list)
@@ -137,6 +170,14 @@ def computeFinalEntityProbs(condProbs_list, contextProbs_list, alpha=0.5):
 
 
 def computeFinalEntityScores(condProbs_list, contextProbs_list, alpha=0.5):
+    """
+    Computes the probabilities of a list.
+
+    Args:
+        condProbs_list: (list): write your description
+        contextProbs_list: (list): write your description
+        alpha: (float): write your description
+    """
     condContextJointProbs_list = []
     condProbs_list = _normalizeProbList(condProbs_list)
     #contextProbs_list = _normalizeProbList(contextProbs_list)
@@ -199,6 +240,13 @@ def evaluateEL(condProbs_list, widIdxs_list, contextProbs_list,
 
 
 def f1(p,r):
+    """
+    Convert f1 ( r2
+
+    Args:
+        p: (int): write your description
+        r: (int): write your description
+    """
     if p == 0.0 and r == 0.0:
         return 0.0
     return (float(2*p*r))/(p + r)
@@ -229,6 +277,13 @@ def strict_pred(true_label_batch, pred_score_batch):
 
 
 def correct_context_prediction(entity_posterior_scores, batch_size):
+    """
+    Corrects the predicted_posterior.
+
+    Args:
+        entity_posterior_scores: (todo): write your description
+        batch_size: (int): write your description
+    """
     bool_array = np.equal(np.argmax(entity_posterior_scores, axis=1),
                           [0]*batch_size)
     correct_preds = np.sum(bool_array)

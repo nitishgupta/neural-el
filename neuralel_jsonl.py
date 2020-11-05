@@ -72,6 +72,12 @@ localpipeline = LocalPipeline()
 
 
 def FLAGS_check(FLAGS):
+    """
+    Checks if the modelcontext
+
+    Args:
+        FLAGS: (int): write your description
+    """
     if not (FLAGS.textcontext and FLAGS.coherence):
         print("*** Local and Document context required ***")
         sys.exit(0)
@@ -81,6 +87,12 @@ def FLAGS_check(FLAGS):
 
 
 def main(_):
+    """
+    Main function.
+
+    Args:
+        _: (int): write your description
+    """
     pp.pprint(flags.FLAGS.__flags)
 
     FLAGS_check(FLAGS)

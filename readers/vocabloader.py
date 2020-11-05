@@ -16,10 +16,23 @@ from readers.config import Config
 
 class VocabLoader(object):
     def __init__(self, config):
+        """
+        Initialize the configuration.
+
+        Args:
+            self: (todo): write your description
+            config: (todo): write your description
+        """
         self.initialize_all_dicts()
         self.config = config
 
     def initialize_all_dicts(self):
+        """
+        Initialize all the dictionary
+
+        Args:
+            self: (todo): write your description
+        """
         (self.word2idx, self.idx2word) = (None, None)
         (self.label2idx, self.idx2label) = (None, None)
         (self.knwid2idx, self.idx2knwid) = (None, None)
@@ -32,6 +45,12 @@ class VocabLoader(object):
         self.crosswikis = None
 
     def loadCrosswikis(self):
+        """
+        Load crosswik from the crosswik.
+
+        Args:
+            self: (todo): write your description
+        """
         if self.crosswikis == None:
             if not os.path.exists(self.config.crosswikis_pkl):
                 print("Crosswikis pkl missing")
@@ -40,6 +59,12 @@ class VocabLoader(object):
         return self.crosswikis
 
     def getWordVocab(self):
+        """
+        Returns the vocab of the vocab.
+
+        Args:
+            self: (todo): write your description
+        """
         if self.word2idx == None or self.idx2word == None:
             if not os.path.exists(self.config.word_vocab_pkl):
                 print("Word Vocab PKL missing")
@@ -49,6 +74,12 @@ class VocabLoader(object):
         return (self.word2idx, self.idx2word)
 
     def getLabelVocab(self):
+        """
+        Get label label.
+
+        Args:
+            self: (todo): write your description
+        """
         if self.label2idx == None or self.idx2label == None:
             if not os.path.exists(self.config.label_vocab_pkl):
                 print("Label Vocab PKL missing")
@@ -58,6 +89,12 @@ class VocabLoader(object):
         return (self.label2idx, self.idx2label)
 
     def getKnwnWidVocab(self):
+        """
+        Get the vocab for the vocab file.
+
+        Args:
+            self: (todo): write your description
+        """
         if self.knwid2idx == None or self.idx2knwid == None:
             if not os.path.exists(self.config.kwnwid_vocab_pkl):
                 print("Known Entities Vocab PKL missing")
@@ -67,6 +104,12 @@ class VocabLoader(object):
         return (self.knwid2idx, self.idx2knwid)
 
     def getTestKnwEnCwiki(self):
+        """
+        Returns a list of kwnKn
+
+        Args:
+            self: (todo): write your description
+        """
         if self.test_knwen_cwikis == None:
             if not os.path.exists(self.config.test_kwnen_cwikis_pkl):
                 print("Test Known Entity CWikis Dict missing")
@@ -76,6 +119,12 @@ class VocabLoader(object):
         return self.test_knwen_cwikis
 
     def getTestAllEnCwiki(self):
+        """
+        Get all all submissions in this test
+
+        Args:
+            self: (todo): write your description
+        """
         if self.test_allen_cwikis == None:
             if not os.path.exists(self.config.test_allen_cwikis_pkl):
                 print("Test All Entity CWikis Dict missing")
@@ -85,6 +134,12 @@ class VocabLoader(object):
         return self.test_allen_cwikis
 
     def getCrosswikisSlice(self):
+        """
+        Returns a slice of the crosswik
+
+        Args:
+            self: (todo): write your description
+        """
         if self.cwikis_slice == None:
             if not os.path.exists(self.config.crosswikis_slice):
                 print("CWikis Slice Dict missing")
@@ -94,6 +149,12 @@ class VocabLoader(object):
         return self.cwikis_slice
 
     def getWID2Wikititle(self):
+        """
+        Return the title of the dialog
+
+        Args:
+            self: (todo): write your description
+        """
         if self.wid2Wikititle == None:
             if not os.path.exists(self.config.widWiktitle_pkl):
                 print("wid2Wikititle pkl missing")
@@ -103,6 +164,12 @@ class VocabLoader(object):
         return self.wid2Wikititle
 
     def getWID2TypeLabels(self):
+        """
+        Load widgets for - type 2typels.
+
+        Args:
+            self: (todo): write your description
+        """
         if self.wid2TypeLabels == None:
             if not os.path.exists(self.config.wid2typelabels_vocab_pkl):
                 print("wid2TypeLabels pkl missing")
@@ -112,6 +179,12 @@ class VocabLoader(object):
         return self.wid2TypeLabels
 
     def loadGloveVectors(self):
+        """
+        Load gloveors
+
+        Args:
+            self: (todo): write your description
+        """
         if self.glove2vec == None:
             if not os.path.exists(self.config.glove_pkl):
                 print("Glove_Vectors_PKL doesnot exist")
@@ -121,6 +194,12 @@ class VocabLoader(object):
         return self.glove2vec
 
     def getGloveWordVocab(self):
+        """
+        Returns a word2idx2word arguments :
+
+        Args:
+            self: (todo): write your description
+        """
         if self.gword2idx == None or self.gidx2word == None:
             if not os.path.exists(self.config.glove_word_vocab_pkl):
                 print("Glove Word Vocab PKL missing")
