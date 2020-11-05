@@ -14,6 +14,24 @@ class WikiDescModel(Model):
     def __init__(self, desc_batch, trueentity_embs, negentity_embs, allentity_embs,
                  batch_size, doclength, wordembeddim, filtersize, desc_encoded_dim,
                  scope_name, device, dropout_keep_prob=1.0):
+        """
+        Parameters ---------- descents : int.
+
+        Args:
+            self: (todo): write your description
+            desc_batch: (str): write your description
+            trueentity_embs: (todo): write your description
+            negentity_embs: (todo): write your description
+            allentity_embs: (todo): write your description
+            batch_size: (int): write your description
+            doclength: (int): write your description
+            wordembeddim: (str): write your description
+            filtersize: (int): write your description
+            desc_encoded_dim: (str): write your description
+            scope_name: (str): write your description
+            device: (todo): write your description
+            dropout_keep_prob: (str): write your description
+        """
 
         # [B, doclength, wordembeddim]
         self.desc_batch = desc_batch
@@ -64,6 +82,15 @@ class WikiDescModel(Model):
     ###########   end def __init__      ##########################################
 
     def loss_graph(self, true_entity_ids, scope_name, device_gpu):
+        """
+        Compute the loss loss.
+
+        Args:
+            self: (todo): write your description
+            true_entity_ids: (str): write your description
+            scope_name: (str): write your description
+            device_gpu: (todo): write your description
+        """
 
         with tf.variable_scope(scope_name) as s, tf.device(device_gpu) as d:
             self.crossentropy_losses = tf.nn.sparse_softmax_cross_entropy_with_logits(

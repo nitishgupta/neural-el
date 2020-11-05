@@ -5,6 +5,14 @@ pp = pprint.PrettyPrinter()
 
 class Config(object):
     def __init__(self, paths_config, verbose=False):
+        """
+        Initialize vocab configuration file.
+
+        Args:
+            self: (todo): write your description
+            paths_config: (todo): write your description
+            verbose: (bool): write your description
+        """
         config = configparser.ConfigParser()
         config._interpolation = configparser.ExtendedInterpolation()
         config.read(paths_config)

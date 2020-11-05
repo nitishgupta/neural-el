@@ -9,6 +9,14 @@ from readers import utils
 
 class CrosswikisTest(object):
     def __init__(self, config, vocabloader):
+        """
+        Initialize vocwid object.
+
+        Args:
+            self: (todo): write your description
+            config: (todo): write your description
+            vocabloader: (todo): write your description
+        """
         print("Loading Crosswikis")
         # self.crosswikis = vocabloader.loadCrosswikis()
 
@@ -22,6 +30,12 @@ class CrosswikisTest(object):
         print("Size of known wids : {}".format(len(self.knwid2idx)))
 
     def test(self):
+        """
+        Prints the cross - probability.
+
+        Args:
+            self: (todo): write your description
+        """
         print("Test starting")
         maxCands = 0
         minCands = 0
@@ -57,6 +71,12 @@ class CrosswikisTest(object):
         print("Not Sorted Probs {}".format(notSortedProbs))
 
     def test_pruned(self):
+        """
+        Prints out the probability of - probabilities.
+
+        Args:
+            self: (todo): write your description
+        """
         print("Test starting")
         maxCands = 0
         minCands = 30
@@ -93,6 +113,13 @@ class CrosswikisTest(object):
         print("Not Sorted Probs {}".format(notSortedProbs))
 
     def makeCWKnown(self, cwOutPath):
+        """
+        Makes a list of all the probability of each surface.
+
+        Args:
+            self: (todo): write your description
+            cwOutPath: (str): write your description
+        """
         cw = {}
         MAXCAND = 30
         surfacesProcessed = 0
@@ -143,6 +170,14 @@ from readers import utils
 
 class CrosswikisTest(object):
     def __init__(self, config, vocabloader):
+        """
+        Initialize vocwid object.
+
+        Args:
+            self: (todo): write your description
+            config: (todo): write your description
+            vocabloader: (todo): write your description
+        """
         print("Loading Crosswikis")
         # self.crosswikis = vocabloader.loadCrosswikis()
 
@@ -156,6 +191,12 @@ class CrosswikisTest(object):
         print("Size of known wids : {}".format(len(self.knwid2idx)))
 
     def test(self):
+        """
+        Prints the cross - probability.
+
+        Args:
+            self: (todo): write your description
+        """
         print("Test starting")
         maxCands = 0
         minCands = 0
@@ -191,6 +232,12 @@ class CrosswikisTest(object):
         print("Not Sorted Probs {}".format(notSortedProbs))
 
     def test_pruned(self):
+        """
+        Prints out the probability of - probabilities.
+
+        Args:
+            self: (todo): write your description
+        """
         print("Test starting")
         maxCands = 0
         minCands = 30
@@ -227,6 +274,13 @@ class CrosswikisTest(object):
         print("Not Sorted Probs {}".format(notSortedProbs))
 
     def makeCWKnown(self, cwOutPath):
+        """
+        Makes a list of all the probability of each surface.
+
+        Args:
+            self: (todo): write your description
+            cwOutPath: (str): write your description
+        """
         cw = {}
         MAXCAND = 30
         surfacesProcessed = 0

@@ -10,12 +10,34 @@ class BatchNorm():
                  epsilon=1e-4,
                  name='bn',
                  reuse_vars=False):
+        """
+        Initialize the model.
+
+        Args:
+            self: (todo): write your description
+            input: (str): write your description
+            training: (todo): write your description
+            decay: (float): write your description
+            epsilon: (float): write your description
+            name: (str): write your description
+            reuse_vars: (list): write your description
+        """
 
         self.decay = decay
         self.epsilon = epsilon
         self.batchnorm(input, training, name, reuse_vars)
 
     def batchnorm(self, input, training, name, reuse_vars):
+        """
+        Batch normalization.
+
+        Args:
+            self: (todo): write your description
+            input: (todo): write your description
+            training: (todo): write your description
+            name: (str): write your description
+            reuse_vars: (bool): write your description
+        """
         with tf.variable_scope(name, reuse=reuse_vars) as bn:
             rank = len(input.get_shape().as_list())
             in_dim = input.get_shape().as_list()[-1]
@@ -44,6 +66,14 @@ class BatchNorm():
                                   lambda: self.get_normalizer(input, False))
 
     def get_normalizer(self, input, train_flag):
+        """
+        Get normalizer.
+
+        Args:
+            self: (todo): write your description
+            input: (str): write your description
+            train_flag: (str): write your description
+        """
         if train_flag:
             self.mean, self.variance = tf.nn.moments(input, self.axes)
             # Fixes numerical instability if variance ~= 0, and it goes negative
@@ -62,10 +92,28 @@ class BatchNorm():
             return self.output_test
 
     def get_batch_moments(self):
+        """
+        Gets the moments.
+
+        Args:
+            self: (todo): write your description
+        """
         return self.mean, self.variance
 
     def get_ema_moments(self):
+        """
+        Compute the moments.
+
+        Args:
+            self: (todo): write your description
+        """
         return self.ema.average(self.mean), self.ema.average(self.variance)
 
     def get_offset_scale(self):
+        """
+        Get the offset of the scale
+
+        Args:
+            self: (todo): write your description
+        """
         return self.offset, self.scale

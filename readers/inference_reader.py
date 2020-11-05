@@ -14,6 +14,20 @@ class InferenceReader(object):
     def __init__(self, config, vocabloader, test_mens_file,
                  num_cands, batch_size, strict_context=True,
                  pretrain_wordembed=True, coherence=True):
+        """
+        Initialize word embedding.
+
+        Args:
+            self: (todo): write your description
+            config: (todo): write your description
+            vocabloader: (todo): write your description
+            test_mens_file: (str): write your description
+            num_cands: (int): write your description
+            batch_size: (int): write your description
+            strict_context: (str): write your description
+            pretrain_wordembed: (bool): write your description
+            coherence: (todo): write your description
+        """
         self.pipeline = remote_pipeline.RemotePipeline(
             server_api='http://macniece.seas.upenn.edu:4001')
         self.typeOfReader = "inference"
@@ -83,16 +97,36 @@ class InferenceReader(object):
   #*******************      END __init__      *********************************
 
     def get_vector(self, word):
+        """
+        Get vector of word.
+
+        Args:
+            self: (todo): write your description
+            word: (str): write your description
+        """
         if word in self.word2vec:
             return self.word2vec[word]
         else:
             return self.word2vec['unk']
 
     def reset_test(self):
+        """
+        !
+
+        Args:
+            self: (todo): write your description
+        """
         self.men_idx = 0
         self.epochs = 0
 
     def processTestDoc(self, test_mens_file):
+        """
+        Process a sentence from a list of sentences.
+
+        Args:
+            self: (todo): write your description
+            test_mens_file: (str): write your description
+        """
         with open(test_mens_file, 'r') as f:
             lines = f.read().strip().split("\n")
         assert len(lines) == 1, "Only support inference for single doc"
@@ -166,6 +200,14 @@ class InferenceReader(object):
         return mentions
 
     def bracketMentionInSentence(self, s, nerDict):
+        """
+        Generate a string for a - delimiterable.
+
+        Args:
+            self: (todo): write your description
+            s: (str): write your description
+            nerDict: (todo): write your description
+        """
         tokens = s.split(" ")
         start = nerDict['start']
         end = nerDict['end']
@@ -174,6 +216,12 @@ class InferenceReader(object):
         return ' '.join(tokens)
 
     def _read_mention(self):
+        """
+        Reads the next epoch.
+
+        Args:
+            self: (todo): write your description
+        """
         mention = self.mentions[self.men_idx]
         self.men_idx += 1
         if self.men_idx == self.num_mens:
@@ -265,6 +313,15 @@ class InferenceReader(object):
                 coherence_batch, wid_idxs_batch, wid_cprobs_batch)
 
     def print_test_batch(self, mention, wid_idxs, wid_cprobs):
+        """
+        Print a batch of the test results.
+
+        Args:
+            self: (todo): write your description
+            mention: (str): write your description
+            wid_idxs: (str): write your description
+            wid_cprobs: (str): write your description
+        """
         print("Surface : {}  WID : {}  WT: {}".format(
             mention.surface, mention.wid, self.wid2WikiTitle[mention.wid]))
         print(mention.wid in self.knwid2idx)
@@ -274,6 +331,13 @@ class InferenceReader(object):
             print("\n")
 
     def make_candidates_cprobs(self, m):
+        """
+        Generate candidate candidates.
+
+        Args:
+            self: (todo): write your description
+            m: (todo): write your description
+        """
         # Fill num_cands now
         surface = utils._getLnrm(m.surface)
         if surface in self.crosswikis:
@@ -315,6 +379,13 @@ class InferenceReader(object):
         return embedded_mentions_batch
 
     def pad_batch(self, batch):
+        """
+        Pad a batch of words into a batch of words.
+
+        Args:
+            self: (todo): write your description
+            batch: (todo): write your description
+        """
         if not self.pretrain_wordembed:
             pad_unit = self.word2idx[self.unk_word]
         else:
@@ -327,6 +398,12 @@ class InferenceReader(object):
         return (batch, lengths)
 
     def _next_padded_batch(self):
+        """
+        Batch next batch.
+
+        Args:
+            self: (todo): write your description
+        """
         (left_batch, right_batch,
          coherence_batch,
          wid_idxs_batch, wid_cprobs_batch) = self._next_batch()
@@ -342,15 +419,35 @@ class InferenceReader(object):
                 coherence_batch, wid_idxs_batch, wid_cprobs_batch)
 
     def convert_word2idx(self, word):
+        """
+        Converts word2idx.
+
+        Args:
+            self: (todo): write your description
+            word: (str): write your description
+        """
         if word in self.word2idx:
             return self.word2idx[word]
         else:
             return self.word2idx[self.unk_word]
 
     def next_test_batch(self):
+        """
+        Returns the next batch.
+
+        Args:
+            self: (todo): write your description
+        """
         return self._next_padded_batch()
 
     def widIdx2WikiTitle(self, widIdx):
+        """
+        Return the w : py : class : wx2Wiki.
+
+        Args:
+            self: (todo): write your description
+            widIdx: (int): write your description
+        """
         wid = self.idx2knwid[widIdx]
         wikiTitle = self.wid2WikiTitle[wid]
         return wikiTitle

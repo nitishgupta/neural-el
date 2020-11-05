@@ -11,6 +11,23 @@ class ContextEncoderModel(Model):
     def __init__(self, num_layers, batch_size, lstm_size,
                  left_embed_batch, left_lengths, right_embed_batch, right_lengths,
                  context_encoded_dim, scope_name, device, dropout_keep_prob=1.0):
+        """
+        Initialize the network.
+
+        Args:
+            self: (todo): write your description
+            num_layers: (int): write your description
+            batch_size: (int): write your description
+            lstm_size: (int): write your description
+            left_embed_batch: (todo): write your description
+            left_lengths: (int): write your description
+            right_embed_batch: (int): write your description
+            right_lengths: (int): write your description
+            context_encoded_dim: (str): write your description
+            scope_name: (str): write your description
+            device: (todo): write your description
+            dropout_keep_prob: (str): write your description
+        """
 
         self.num_layers = num_layers  # Num of layers in the encoder and decoder network
         self.num_lstm_layers = 1
@@ -110,6 +127,15 @@ class ContextEncoderModel(Model):
                 context_encoded, keep_prob=self.dropout_keep_prob)
 
     def get_last_output(self, outputs, lengths, name):
+        """
+        Returns the last batch of sequences.
+
+        Args:
+            self: (todo): write your description
+            outputs: (todo): write your description
+            lengths: (int): write your description
+            name: (str): write your description
+        """
         reverse_output = tf.reverse_sequence(input=outputs,
                                              seq_lengths=tf.to_int64(lengths),
                                              seq_dim=1,

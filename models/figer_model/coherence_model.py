@@ -15,6 +15,22 @@ class CoherenceModel(Model):
                  coherence_indices, coherence_values, coherence_matshape,
                  context_encoded_dim, scope_name, device,
                  dropout_keep_prob=1.0):
+        """
+        Initialize the network.
+
+        Args:
+            self: (todo): write your description
+            num_layers: (int): write your description
+            batch_size: (int): write your description
+            input_size: (int): write your description
+            coherence_indices: (int): write your description
+            coherence_values: (todo): write your description
+            coherence_matshape: (todo): write your description
+            context_encoded_dim: (str): write your description
+            scope_name: (str): write your description
+            device: (todo): write your description
+            dropout_keep_prob: (str): write your description
+        """
 
         # Num of layers in the encoder and decoder network
         self.num_layers = num_layers

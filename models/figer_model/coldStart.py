@@ -19,6 +19,13 @@ from models.figer_model.loss_optim import LossOptim
 
 class ColdStart(object):
     def __init__(self, figermodel):
+        """
+        Initialize the network
+
+        Args:
+            self: (todo): write your description
+            figermodel: (todo): write your description
+        """
         print("######   ENTERED THE COLD WORLD OF THE UNKNOWN    ##############")
         # Object of the WikiELModel Class
         self.fm = figermodel
@@ -31,6 +38,12 @@ class ColdStart(object):
          self.idx2coldwid) = (self.fm.reader.coldwid2idx, self.fm.reader.idx2coldwid)
 
     def _makeDescLossGraph(self):
+        """
+        Creates the graph for the model.
+
+        Args:
+            self: (todo): write your description
+        """
         with tf.variable_scope("cold") as s:
             with tf.device(self.fm.device_placements['gpu']) as d:
                 tf.set_random_seed(1)
@@ -123,6 +136,13 @@ class ColdStart(object):
 
     #############################################################################
     def _trainColdEmbFromTypes(self, epochsToTrain=5):
+        """
+        Train the model.
+
+        Args:
+            self: (todo): write your description
+            epochsToTrain: (todo): write your description
+        """
         print("Training Cold Entity Embeddings from Typing Info")
 
         epochsDone = self.fm.reader.val_epochs
@@ -161,6 +181,13 @@ class ColdStart(object):
 
     #############################################################################
     def _trainColdEmbFromTypesAndDesc(self, epochsToTrain=5):
+        """
+        Training function.
+
+        Args:
+            self: (todo): write your description
+            epochsToTrain: (todo): write your description
+        """
         print("Training Cold Entity Embeddings from Typing Info")
 
         epochsDone = self.fm.reader.val_epochs
@@ -202,6 +229,12 @@ class ColdStart(object):
     #############################################################################
 
     def runEval(self):
+        """
+        Run inference.
+
+        Args:
+            self: (todo): write your description
+        """
         print("Running Evaluations")
         self.fm.reader.reset_validation()
         correct = 0
