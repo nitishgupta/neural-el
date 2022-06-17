@@ -19,7 +19,7 @@ ccg_nlpy == 0.11.0
 # readers/inference_reader.py: 3
 # readers/utils.py: 11
 # readers/vocabloader.py: 13
-numpy == 1.11.3
+numpy == 1.21.0
 
 # models/base.py: 3
 # models/batch_normalizer.py: 1,3
